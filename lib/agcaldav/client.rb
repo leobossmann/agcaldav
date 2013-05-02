@@ -282,7 +282,7 @@ module AgCalDAV
 	    res = h.request req
 	    # res is a 401 response with a WWW-Authenticate header
 	    
-	    auth = @digest_auth.auth_header @duri, res['www-authenticate'], method
+	    auth = @digest_auth.auth_header @duri, res['www-authenticate'].gsub('"md5"', 'MD5').gsub('negotiate, ', ''), method
 	    
     	return auth
     end
