@@ -101,7 +101,7 @@ module Icalendar
 
       # Now doing some basic initialization
       sequence 0
-      timestamp DateTime.now
+      timestamp DateTime.now.strftime("%Y%m%dT%H%M%SZ")
     end
 
     def alarm(&block)
