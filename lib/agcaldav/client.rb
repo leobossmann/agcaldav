@@ -116,9 +116,7 @@ module AgCalDAV
       	return false
       else
       	r.first.events.first 
-      end
-
-      
+      end 
     end
 
     def delete_event uuid
@@ -161,6 +159,7 @@ module AgCalDAV
         geo_location  event[:geo_location]
         status        event[:status]
         url           event[:url]
+        organizer     event[:organizer]
       end
       cstring = c.to_ical
       res = nil
@@ -181,12 +180,26 @@ module AgCalDAV
     end
 
     def update_event event
-      #TODO... fix me
-      if delete_event event[:uid]
-        create_event event
-      else
-        return false
-      end
+      c = Calendar.new
+      c.events = []
+      c.events << event
+      cstring = c.to_ical
+
+      res = nil
+      http = Net::HTTP.new(@host, @port)
+      __create_http.start { |http|
+        req = Net::HTTP::Put.new("#{@url}/#{event.uid}.ics")
+        req['Content-Type'] = 'text/calendar'
+        if not @authtype == 'digest'
+          req.basic_auth @user, @password
+        else
+          req.add_field 'Authorization', digestauth('PUT')
+        end
+        req.body = cstring
+        res = http.request( req )
+      }
+      errorhandling res
+      find_event event.uid     
     end
 
     def add_alarm tevent, altCal="Calendar"
